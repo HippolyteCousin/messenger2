@@ -24,6 +24,7 @@ app.post('/channels', async (req, res) => {
   // const channel = await db.channels.create(req.body)
   // res.status(201).json(channel)
   console.log(req)
+  res.status(201)
 })
 
 app.get('/channels/:id', async (req, res) => {
