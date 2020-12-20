@@ -23,3 +23,8 @@ Dans un channel, l'utilisateur peut envoyer des messages dans le dur.
 
 
 Par contre, niveau sécurité, c'est pas encore ça..
+
+
+## Contact
+
+N'hésitez pas à m'envoyer un message sur mon adresse: hippolyte.cousin@edu.ece.fr pour tout renseignement.
