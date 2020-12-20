@@ -14,6 +14,23 @@ export const apiGetChannel = async() => {
     }
 }
 
+export const apiCreateChannel = async(username, error) => {
+    try {
+        const readValues = await fetch(`http://localhost:3001/channels`, { headers: MY_HEADERS, mode: 'cors', method: 'POST',
+                                                                           body: JSON.stringify({
+                                                                               username: username
+                                                                           })})
+
+        if(readValues.ok) {
+            const res = await readValues.json()
+            console.log(res)
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 export const apiPostUser = async(username, email, password, erreur) => {
     try {
         const postValues = await fetch(`http://localhost:3001/users`, { headers: MY_HEADERS, mode: 'cors', method: 'POST',

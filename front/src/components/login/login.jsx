@@ -19,7 +19,9 @@ const LogIn = (props) => {
     const onSubmit = (data) => {
         apiLogin(data.username, data.password,
             (loggedIn) => {
-                history.push("/home");
+                history.push({
+                    pathname: '/home',
+                    search: '?id=' + data.username})
             },
             (erreur) => {
                 console.log(erreur)

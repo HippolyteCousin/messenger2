@@ -168,20 +168,17 @@ module.exports = {
                         users.some((e, index) => {
                             if (username === e.username && password === e.password) {
                                 resolve(e)
-                                console.log("1")
                                 return true
                             }
                             else {
                                 if (username === e.username && password !== e.password) {
                                     resolve("Mauvais mot de passe")
-                                    console.log("2")
                                     return true
                                 }
                             }
                             cpt += 1
                             if (cpt === users.length) {
                                 resolve("Utilisateur inexistant")
-                                console.log("3")
                             }
                         })
                     })
