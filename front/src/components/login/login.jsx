@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import loginImg from "./login.svg";
 import { useHistory } from "react-router-dom";
 import "./style.scss";
@@ -8,6 +8,7 @@ import { apiLogin } from "../../utils/api_users"
 const LogIn = (props) => {
 
     const { register, handleSubmit, errors } = useForm()
+    const [myErrors, setErrors] = useState('');
     let history = useHistory()
 
     const redirectToRegister = () => {
@@ -24,7 +25,7 @@ const LogIn = (props) => {
                     search: '?id=' + data.username})
             },
             (erreur) => {
-                console.log(erreur)
+                setErrors(erreur)
             })
     }
 
@@ -45,6 +46,11 @@ const LogIn = (props) => {
               <input type="password" name="password" placeholder="password" ref={register({ required: true, maxLength: 30 })} />
             </div>
           </div>
+          {myErrors &&
+              <div className="alert-erreur" role="alert">
+                  {myErrors}
+              </div>
+          }
         </div>
         <div className="footer">
           <button type="submit" className="btn">

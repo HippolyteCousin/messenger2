@@ -7,12 +7,38 @@ const db = level(__dirname + '/../db')
 
 module.exports = {
   channels: {
+    addUser: async (username, chan) => {
+        return new Promise( (resolve, reject) => {
+          let tabUsers = []
+
+          db.createReadStream({
+            gt: "channels:",
+            lte: "channels" + String.fromCharCode(":".charCodeAt(0) + 1),
+          }).on( 'data', ({key, value}) => {
+            channel = JSON.parse(value)
+            channel.id = key.split(':')[1]
+            if(channel.name === chan) {
+                if(channel.users) {
+                    tabUsers = channel.users
+                }
+                tabUsers.push(username)
+                db.put(`channels:${channel.id}`, JSON.stringify({
+                    username: channel.username,
+                    name: channel.name,
+                    users: tabUsers
+                }))
+            }
+          }).on( 'error', (err) => {
+            reject(err)
+          }).on( 'end', () => {
+            resolve(username)
+          })
+        })
+    },
     create: async (channel) => {
       if(!channel.name) throw Error('Invalid channel')
       const id = uuid()
       await db.put(`channels:${id}`, JSON.stringify(channel))
-      return merge(channel, {id: id})
-      console.log(channel)
     },
     get: async (id) => {
       if(!id) throw Error('Invalid id')
@@ -20,16 +46,25 @@ module.exports = {
       const channel = JSON.parse(data)
       return merge(channel, {id: id})
     },
-    list: async () => {
+    list: async (username) => {
       return new Promise( (resolve, reject) => {
         const channels = []
+        let table = []
         db.createReadStream({
           gt: "channels:",
           lte: "channels" + String.fromCharCode(":".charCodeAt(0) + 1),
         }).on( 'data', ({key, value}) => {
           channel = JSON.parse(value)
           channel.id = key.split(':')[1]
-          channels.push(channel)
+          if(channel.username === username) {
+              channels.push(channel)
+          }
+          else if(channel.users) {
+            table = channel.users.filter((user) => user === username)
+            if(table.length > 0) {
+                channels.push(channel)
+            }
+          }
         }).on( 'error', (err) => {
           reject(err)
         }).on( 'end', () => {
@@ -102,13 +137,13 @@ module.exports = {
                 } else {
                     users.some((e, index) => {
                         if (myUser.username === e.username || myUser.email === e.email) {
-                            resolve("Utilisateur existant")
+                            resolve("Utilisateur déjà existant")
                             return true
                         }
                         else if (index + 1 === users.length) {
                             const id = uuid()
                             db.put(`users:${id}`, JSON.stringify(myUser))
-                            resolve(e)
+                            resolve("Registered successfully")
                         }
                     })
                 }
@@ -120,6 +155,25 @@ module.exports = {
       const data = await db.get(`users:${id}`)
       const user = JSON.parse(data)
       return merge(user, {id: id})
+    },
+    email: async (username) => {
+      return new Promise( (resolve, reject) => {
+
+        db.createReadStream({
+          gt: "users:",
+          lte: "users" + String.fromCharCode(":".charCodeAt(0) + 1),
+        }).on( 'data', ({key, value}) => {
+          user = JSON.parse(value)
+
+          if(user.username === username) {
+              resolve(user.email)
+          }
+        }).on( 'error', (err) => {
+          reject(err)
+        }).on( 'end', () => {
+          resolve(user)
+        })
+      })
     },
     list: async () => {
       return new Promise( (resolve, reject) => {
@@ -153,7 +207,7 @@ module.exports = {
             return new Promise((resolve, reject) => {
 
                 const users = []
-                let cpt = 0
+                let total = 0
 
                 db.createReadStream({
                     gt: "users:",
@@ -176,8 +230,8 @@ module.exports = {
                                     return true
                                 }
                             }
-                            cpt += 1
-                            if (cpt === users.length) {
+                            total += 1
+                            if (total === users.length) {
                                 resolve("Utilisateur inexistant")
                             }
                         })

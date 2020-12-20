@@ -4,6 +4,7 @@ import Login from "./components/login/login";
 import Register from "./components/login/register";
 import Welcome from "./components/welcome/welcome";
 import Home from "./components/welcome/home";
+import Channel from "./components/welcome/channel";
 import {
   BrowserRouter as Router,
   Switch,
@@ -27,6 +28,9 @@ const App = () => {
               </Route>
               <Route path='/home'>
                 <Home />
+              </Route>
+              <Route path='/channel'>
+                <Channel />
               </Route>
             </Switch>
           </div>

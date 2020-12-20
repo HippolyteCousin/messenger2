@@ -20,14 +20,19 @@ app.get('/', (req, res) => {
 
 // Channels
 
-app.get('/channels', async (req, res) => {
-  const channels = await db.channels.list()
+app.get('/channels/:username', async (req, res) => {
+  const channels = await db.channels.list(req.params.username)
   res.json(channels)
 })
 
 app.post('/channels', async (req, res) => {
-  const channel = await db.channels.create(req.body)
-  res.status(201).json(channel)
+    const channel = await db.channels.create(req.body)
+    if(channel === "Channel existant") {
+        res.status(404).json(channel)
+    }
+    else {
+        res.status(201).json(channel)
+    }
 })
 
 app.get('/channels/:id', async (req, res) => {
@@ -79,8 +84,18 @@ app.post('/login', async (req, res) => {
     }
 })
 
+app.get('/email/:username', async (req, res) => {
+    const email = await db.users.email(req.params.username)
+    res.status(201).json(email)
+})
+
 app.get('/users/:id', async (req, res) => {
   const user = await db.users.get(req.params.id)
+  res.json(user)
+})
+
+app.post('/add', async (req, res) => {
+  const user = await db.channels.addUser(req.body.username, req.body.channel)
   res.json(user)
 })
 

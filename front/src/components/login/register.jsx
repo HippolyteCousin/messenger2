@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import registerImg from "./register.svg";
 import { useHistory } from "react-router-dom";
 import "./style.scss";
@@ -8,6 +8,8 @@ import { useForm } from 'react-hook-form'
 const Register = (props) => {
 
     const { register, handleSubmit, errors } = useForm()
+    const [myErrors, setErrors] = useState('')
+    const [mySucces, setSucces] = useState('')
     let history = useHistory()
 
     const redirectToLogin = () => {
@@ -17,8 +19,12 @@ const Register = (props) => {
         history.push('/');
     }
     const onSubmit = (data) => apiPostUser(
-        data.username, data.email, data.password, (erreur) => {
-            console.log(erreur)
+        data.username, data.email, data.password,
+        (succes) => {
+            setSucces(succes)
+            console.log(succes)
+        },(erreur) => {
+            setErrors(erreur)
         });
 
     // const handleSubmitClick = () => {
@@ -57,6 +63,20 @@ const Register = (props) => {
                      ref={register({ required: true, maxLength: 30 })}
                      />
             </div>
+          </div>
+          <div className="alert-erreur">
+          {myErrors &&
+              <div>
+                  {myErrors}
+              </div>
+          }
+          </div>
+          <div className="alert-succes">
+          {mySucces &&
+              <div>
+                  {mySucces}
+              </div>
+          }
           </div>
         </div>
         <div className="footer">
