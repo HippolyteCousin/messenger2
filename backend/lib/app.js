@@ -3,9 +3,14 @@ const db = require('./db')
 const express = require('express')
 const cors = require('cors')
 const app = express()
+const bodyParser = require('body-parser')
 
-app.use(require('body-parser').json())
 app.use(cors())
+
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
   res.send([
@@ -21,10 +26,8 @@ app.get('/channels', async (req, res) => {
 })
 
 app.post('/channels', async (req, res) => {
-  // const channel = await db.channels.create(req.body)
-  // res.status(201).json(channel)
-  console.log(req)
-  res.status(201)
+  const channel = await db.channels.create(req.body)
+  res.status(201).json(channel)
 })
 
 app.get('/channels/:id', async (req, res) => {
@@ -58,7 +61,22 @@ app.get('/users', async (req, res) => {
 
 app.post('/users', async (req, res) => {
   const user = await db.users.create(req.body)
-  res.status(201).json(user)
+  if(user === "Utilisateur existant") {
+      res.status(404).json(user)
+  }
+  else {
+      res.status(201).json(user)
+  }
+})
+
+app.post('/login', async (req, res) => {
+    const user = await db.users.login(req.body.username, req.body.password)
+    if(user === "Mauvais mot de passe" || user === "Utilisateur inexistant") {
+        res.status(404).json(user)
+    }
+    else {
+        res.status(201).json(user)
+    }
 })
 
 app.get('/users/:id', async (req, res) => {

@@ -8,10 +8,10 @@ const db = level(__dirname + '/../db')
 module.exports = {
   channels: {
     create: async (channel) => {
-      // if(!channel.name) throw Error('Invalid channel')
-      // const id = uuid()
-      // await db.put(`channels:${id}`, JSON.stringify(channel))
-      // return merge(channel, {id: id})
+      if(!channel.name) throw Error('Invalid channel')
+      const id = uuid()
+      await db.put(`channels:${id}`, JSON.stringify(channel))
+      return merge(channel, {id: id})
       console.log(channel)
     },
     get: async (id) => {
@@ -81,11 +81,39 @@ module.exports = {
     },
   },
   users: {
-    create: async (user) => {
-      if(!user.username) throw Error('Invalid user')
-      const id = uuid()
-      await db.put(`users:${id}`, JSON.stringify(user))
-      return merge(user, {id: id})
+      create: async (myUser) => {
+
+        return new Promise((resolve, reject) => {
+            const users = []
+            db.createReadStream({
+                gt: "users:",
+                lte: "users" + String.fromCharCode(":".charCodeAt(0) + 1),
+            }).on('data', ({ key, value }) => {
+                user = JSON.parse(value)
+                user.id = key.split(':')[1]
+                users.push(user)
+            }).on('error', (err) => {
+                reject(err)
+            }).on('end', (err) => {
+                if (users.length === 0) {
+                const id = uuid()
+                db.put(`users:${id}`, JSON.stringify(myUser))
+                resolve(myUser)
+                } else {
+                    users.some((e, index) => {
+                        if (myUser.username === e.username || myUser.email === e.email) {
+                            resolve("Utilisateur existant")
+                            return true
+                        }
+                        else if (index + 1 === users.length) {
+                            const id = uuid()
+                            db.put(`users:${id}`, JSON.stringify(myUser))
+                            resolve(e)
+                        }
+                    })
+                }
+            })
+        })
     },
     get: async (id) => {
       if(!id) throw Error('Invalid id')
@@ -119,8 +147,47 @@ module.exports = {
       const original = store.users[id]
       if(!original) throw Error('Unregistered user id')
       delete store.users[id]
-    }
-  },
+    },
+    login: async (username, password) => {
+
+            return new Promise((resolve, reject) => {
+
+                const users = []
+                let cpt = 0
+
+                db.createReadStream({
+                    gt: "users:",
+                    lte: "users" + String.fromCharCode(":".charCodeAt(0) + 1),
+                }).on('data', ({ key, value }) => {
+                    user = JSON.parse(value)
+                    user.id = key.split(':')[1]
+                    users.push(user)
+                }).on('error', (err) => {
+                    reject(err)
+                    }).on('end', (err) => {
+                        users.some((e, index) => {
+                            if (username === e.username && password === e.password) {
+                                resolve(e)
+                                console.log("1")
+                                return true
+                            }
+                            else {
+                                if (username === e.username && password !== e.password) {
+                                    resolve("Mauvais mot de passe")
+                                    console.log("2")
+                                    return true
+                                }
+                            }
+                            cpt += 1
+                            if (cpt === users.length) {
+                                resolve("Utilisateur inexistant")
+                                console.log("3")
+                            }
+                        })
+                    })
+                })
+            }
+        },
   admin: {
     clear: async () => {
       await db.clear()

@@ -1,37 +1,46 @@
 import React from 'react';
 import loginImg from "./login.svg";
-import { withRouter } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import "./style.scss";
 import { useForm } from 'react-hook-form'
-
+import { apiLogin } from "../../utils/api_users"
 
 const LogIn = (props) => {
 
     const { register, handleSubmit, errors } = useForm()
+    let history = useHistory()
 
     const redirectToRegister = () => {
-        props.history.push('/register');
+        history.push('/register');
     }
     const redirectToHome = () => {
-        props.history.push('/');
+        history.push('/');
     }
-    const onSubmit = data => console.log(data.username);
+    const onSubmit = (data) => {
+        apiLogin(data.username, data.password,
+            (loggedIn) => {
+                history.push("/home");
+            },
+            (erreur) => {
+                console.log(erreur)
+            })
+    }
 
     return (
       <form className="base-container" onSubmit={handleSubmit(onSubmit)}>
         <div className="header">Login</div>
         <div className="content">
           <div className="image">
-            <img src={loginImg} />
+            <img src={loginImg} alt="accueil login"/>
           </div>
           <div className="form">
             <div className="form-group">
               <label htmlFor="username">Username</label>
-              <input type="text" name="username" placeholder="username" ref={register}/>
+              <input type="text" name="username" placeholder="username" ref={register({ required: true, maxLength: 30 })}/>
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input type="password" name="password" placeholder="password" ref={register} />
+              <input type="password" name="password" placeholder="password" ref={register({ required: true, maxLength: 30 })} />
             </div>
           </div>
         </div>

@@ -1,13 +1,15 @@
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
-function welcome(props) {
+const Welcome = (props) => {
+
+    let history = useHistory()
 
     const redirectToLogin = () => {
-        props.history.push('/login');
+        history.push('/login');
     }
     const redirectToRegister = () => {
-        props.history.push('/register');
+        history.push('/register');
     }
 
     return (
@@ -30,4 +32,4 @@ function welcome(props) {
 }
 
 
-export default withRouter(welcome);
+export default Welcome;

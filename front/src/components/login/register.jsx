@@ -1,16 +1,25 @@
 import React from "react";
 import registerImg from "./register.svg";
-import { withRouter } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import "./style.scss";
+import { apiPostUser } from "../../utils/api_users"
+import { useForm } from 'react-hook-form'
 
 const Register = (props) => {
 
+    const { register, handleSubmit, errors } = useForm()
+    let history = useHistory()
+
     const redirectToLogin = () => {
-        props.history.push('/login');
+        history.push('/login');
     }
     const redirectToHome = () => {
-        props.history.push('/');
+        history.push('/');
     }
+    const onSubmit = (data) => apiPostUser(
+        data.username, data.email, data.password, (erreur) => {
+            console.log(erreur)
+        });
 
     // const handleSubmitClick = () => {
     //     console.log("EMail: " + this.state.email);
@@ -18,25 +27,26 @@ const Register = (props) => {
     // }
 
     return (
-      <div className="base-container" >
+      <form className="base-container" onSubmit= { handleSubmit(onSubmit)} >
         <div className="header">Register</div>
         <div className="content">
           <div className="image">
-            <img src={registerImg} />
+            <img src={registerImg} alt="accueil register"/>
           </div>
           <div className="form">
             <div className="form-group">
               <label htmlFor="username">Username</label>
               <input type="text"
                      name="username"
-                     placeholder="username" />
+                     placeholder="username"
+                     ref={register({ required: true, maxLength: 30 })} />
             </div>
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <input type="email"
                      name="email"
                      placeholder="email"
-                     //valueLink={this.linkState('email')}
+                     ref={register({ required: true, maxLength: 30 })}
                      />
             </div>
             <div className="form-group">
@@ -44,13 +54,13 @@ const Register = (props) => {
               <input type="password"
                      name="password"
                      placeholder="password"
-                     //valueLink={this.linkState('password')}
+                     ref={register({ required: true, maxLength: 30 })}
                      />
             </div>
           </div>
         </div>
         <div className="footer">
-          <button type="button"
+          <button type="submit"
                   className="btn"
                   //onClick={handleSubmitClick}
                   >
@@ -64,7 +74,7 @@ const Register = (props) => {
         <div className="home-button">
             <span className="home-message" onClick={() => redirectToHome()}>Home</span>
         </div>
-      </div>
+      </form>
     );
 }
 
